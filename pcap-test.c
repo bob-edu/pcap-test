@@ -104,9 +104,8 @@ int main(int argc, char *argv[]) {
 		printf("[+] Payload hexadecimal value (8 bytes): ");
 		for (int i = 0; i < 8; i++) {
 			printf("%02x ", payload[i]);
-		
-		printf("\n================================================\n");
 		}
+		printf("\n==============================================================\n\n");
 	}
 
 	pcap_close(pcap);
