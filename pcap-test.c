@@ -85,27 +85,31 @@ int main(int argc, char *argv[]) {
 		payload = packet + LIBNET_ETH_H + ip_hdr_size + tcp_hdr_size;
 		
 
-		printf("[>] %u bytes captured\n", header->caplen);
+		printf("=================================================================\n");
+
+		printf("[>] %u bytes captured\n\n", header->caplen);
 
 		printf("[+] Ethernet header size: %u bytes\n", LIBNET_ETH_H);
 		printf("[>] Destination MAC adress: ");
 		print_mac_address(ethernet->ether_dhost);
 		printf("[>] Source MAC adress: ");
 		print_mac_address(ethernet->ether_shost);
+		printf("\n");
 
 		printf("[+] IP header size: %u bytes\n", ip_hdr_size);
 		printf("[>] Source IP adress: %s\n", inet_ntoa(ip->ip_src));
-		printf("[>] Destination IP adress: %s\n", inet_ntoa(ip->ip_dst));
+		printf("[>] Destination IP adress: %s\n\n", inet_ntoa(ip->ip_dst));
 
 		printf("[+] TCP header size: %u bytes\n", tcp_hdr_size);
 		printf("[>] Source port number: %u\n", ntohs(tcp->th_sport));
-		printf("[>] Destination port number: %u\n", ntohs(tcp->th_dport));
+		printf("[>] Destination port number: %u\n\n", ntohs(tcp->th_dport));
 
 		printf("[+] Payload hexadecimal value (8 bytes): ");
 		for (int i = 0; i < 8; i++) {
 			printf("%02x ", payload[i]);
 		}
-		printf("\n==============================================================\n\n");
+
+		printf("\n=================================================================\n\n\n");
 	}
 
 	pcap_close(pcap);
