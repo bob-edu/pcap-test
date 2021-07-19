@@ -29,13 +29,17 @@ bool parse(Param *param, int argc, char *argv[]) {
 	return true;
 }
 
-void print_mac_address (uint8_t host) {
+u_int8_t word_to_bytes(u_int8_t word) {
+	return word * 4;
+}
+
+void print_mac_address(u_int8_t *host) {
 	for (int i = 0; i < 6; i++) {
 		if (i == 5) {
-			printf("%2x\n", host);	
+			printf("%2x\n", host[i]);	
 			break;
 		}
-		printf("%2x:", host);
+		printf("%2x:", host[i]);
 	}
 }
 
@@ -73,27 +77,36 @@ int main(int argc, char *argv[]) {
 		ip = (struct libnet_ipv4_hdr *)(packet + LIBNET_ETH_H);
 		if (ip->ip_p != TCP_PROTOCOL)
 			continue;
+		u_int8_t ip_hdr_size = word_to_bytes(ip->ip_hl);
 
-		tcp = (struct libnet_tcp_hdr *)(packet + LIBNET_ETH_H + LIBNET_IPV4_H);
-		payload = packet + LIBNET_ETH_H + LIBNET_IPV4_H + LIBNET_TCP_H;
+		tcp = (struct libnet_tcp_hdr *)(packet + LIBNET_ETH_H + ip_hdr_size);
+		u_int8_t tcp_hdr_size = word_to_bytes(tcp->th_off);
+
+		payload = packet + LIBNET_ETH_H + ip_hdr_size + tcp_hdr_size;
 		
-		printf("[>] Destination MAC Adress: ");
-		print_port_number(ethernet->ether_dhost);
 
-		printf("[>] Source MAC Adress: ");
-		print_port_number(ethernet->ether_shost);
+		printf("[>] %u bytes captured\n", header->caplen);
 
-		printf("[>] Source IP Adress: %s\n", inet_ntoa(ip->ip_src));
-		printf("[>] Destination IP Adress: %s\n", inet_ntoa(ip->ip_dst));
+		printf("[+] Ethernet header size: %u bytes\n", LIBNET_ETH_H);
+		printf("[>] Destination MAC adress: ");
+		print_mac_address(ethernet->ether_dhost);
+		printf("[>] Source MAC adress: ");
+		print_mac_address(ethernet->ether_shost);
 
-		printf("[>] Source Port Number: %u\n", ntohs(tcp->th_sport));
-		printf("[>] Destination Port Number: %u\n", ntohs(tcp->th_dport));
+		printf("[+] IP header size: %u bytes\n", ip_hdr_size);
+		printf("[>] Source IP adress: %s\n", inet_ntoa(ip->ip_src));
+		printf("[>] Destination IP adress: %s\n", inet_ntoa(ip->ip_dst));
 
-		printf("[>] Payload Hexadecimal Value (8 Bytes): ");
+		printf("[+] TCP header size: %u bytes\n", tcp_hdr_size);
+		printf("[>] Source port number: %u\n", ntohs(tcp->th_sport));
+		printf("[>] Destination port number: %u\n", ntohs(tcp->th_dport));
+
+		printf("[+] Payload hexadecimal value (8 bytes): ");
 		for (int i = 0; i < 8; i++) {
-			printf("%2x ", payload[i]);
-		}
+			printf("%02x ", payload[i]);
+		
 		printf("\n================================================\n");
+		}
 	}
 
 	pcap_close(pcap);
